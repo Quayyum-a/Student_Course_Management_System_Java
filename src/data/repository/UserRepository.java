@@ -21,20 +21,20 @@ public class UserRepository {
                         rs.getString("role")
                 );
             }
+            return null;
         } catch (SQLException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Failed to find user by email: " + email, e);
         }
-        return null;
     }
 
     public User save(User user) {
         String query = "INSERT INTO users (fullName, email, password, role) VALUES (?, ?, ?, ?)";
         try (Connection conn = DatabaseUtil.getConnection();
              PreparedStatement stmt = conn.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setString(4, user.getFullName());
-            stmt.setString(1, user.getEmail());
-            stmt.setString(2, user.getPassword());
-            stmt.setString(3, user.getRole());
+            stmt.setString(1, user.getFullName());
+            stmt.setString(2, user.getEmail());
+            stmt.setString(3, user.getPassword());
+            stmt.setString(4, user.getRole());
             stmt.executeUpdate();
 
             ResultSet rs = stmt.getGeneratedKeys();
@@ -43,8 +43,7 @@ public class UserRepository {
             }
             return user;
         } catch (SQLException e) {
-            e.printStackTrace();
-            return null;
+            throw new RuntimeException("Failed to save user: " + user.getEmail(), e);
         }
     }
 }
