@@ -6,10 +6,12 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import services.AuthService;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -19,15 +21,18 @@ public class AuthServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     @BeforeEach
     public void setUp() {
-        authService = new AuthService(userRepository);
+        authService = new AuthService(userRepository, passwordEncoder);
     }
 
     @Test
     public void testRegisterUserSuccessfully() {
         // Arrange
-        User expectedUser = new User("Test User", 1, "test@example.com", "password123", "STUDENT");
+        User expectedUser = new User("Test User", 1, "test@example.com", "encodedPassword", "STUDENT");
         when(userRepository.findByEmail("test@example.com")).thenReturn(null);
         when(userRepository.save(any(User.class))).thenReturn(expectedUser);
 
@@ -38,6 +43,7 @@ public class AuthServiceTest {
         assertEquals("test@example.com", user.getEmail());
         assertEquals("Test User", user.getFullName());
         verify(userRepository).findByEmail("test@example.com");
+        verify(passwordEncoder).encode("password123");
         verify(userRepository).save(any(User.class));
     }
 
@@ -60,6 +66,7 @@ public class AuthServiceTest {
         // Arrange
         User expectedUser = new User("Test User", 1, "test@example.com", "password123", "STUDENT");
         when(userRepository.findByEmail("test@example.com")).thenReturn(expectedUser);
+        when(passwordEncoder.matches("password123", expectedUser.getPassword())).thenReturn(true);
 
         // Act
         User user = authService.login("test@example.com", "password123");
@@ -68,6 +75,7 @@ public class AuthServiceTest {
         assertNotNull(user);
         assertEquals("test@example.com", user.getEmail());
         verify(userRepository).findByEmail("test@example.com");
+        verify(passwordEncoder).matches("password123", expectedUser.getPassword());
     }
 
     @Test
@@ -75,6 +83,7 @@ public class AuthServiceTest {
         // Arrange
         User expectedUser = new User("Test User", 1, "test@example.com", "password123", "STUDENT");
         when(userRepository.findByEmail("test@example.com")).thenReturn(expectedUser);
+        when(passwordEncoder.matches("wrongpassword", expectedUser.getPassword())).thenReturn(false);
 
         // Act
         User user = authService.login("test@example.com", "wrongpassword");
@@ -82,6 +91,7 @@ public class AuthServiceTest {
         // Assert
         assertNull(user);
         verify(userRepository).findByEmail("test@example.com");
+        verify(passwordEncoder).matches("wrongpassword", expectedUser.getPassword());
     }
 
     @Test
