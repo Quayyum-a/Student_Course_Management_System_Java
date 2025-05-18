@@ -1,0 +1,20 @@
+@startuml
+actor Student
+actor Instructor
+
+Student --> (Login)
+Student --> (Register)
+Student --> (View Enrolled Courses)
+Student --> (View Grades)
+
+Instructor --> (Login)
+Instructor --> (Register)
+Instructor --> (Create Course)
+Instructor --> (Assign Grades)
+Instructor --> (View Enrolled Students)
+
+note right of (Register): Email must be unique for all users
+note right of (Assign Grades): Instructor assigns grades to students in their courses
+note right of (View Enrolled Courses): Includes viewing the course instructor
+
+@enduml
