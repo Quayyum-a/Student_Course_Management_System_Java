@@ -2,12 +2,14 @@ package controller;
 
 import data.model.Course;
 import data.model.User;
+import org.springframework.stereotype.Component;
 import services.AuthService;
 import services.CourseService;
 
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
+@Component
 public class MainController {
     private final AuthService authService;
     private final CourseService courseService;
@@ -18,6 +20,7 @@ public class MainController {
         this.authService = authService;
         this.courseService = courseService;
         this.scanner = new Scanner(System.in);
+        System.out.println("MainController initialized with AuthService and CourseService");
     }
 
     public void start() {
